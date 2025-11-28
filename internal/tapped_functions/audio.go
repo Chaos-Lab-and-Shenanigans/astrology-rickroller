@@ -2,6 +2,7 @@ package tappedfunctions
 
 import (
 	"bytes"
+	"io"
 	"time"
 
 	"github.com/ebitengine/oto/v3"
@@ -18,7 +19,7 @@ func playAudio(rickAudBytes []byte, errCh chan error) {
 	//check if player is already initializated
 	if player != nil {
 		player.Play()
-		go handleStop()
+		go handlePause()
 		errCh <- nil
 		return
 	}
@@ -52,9 +53,9 @@ func playAudio(rickAudBytes []byte, errCh chan error) {
 	<-readyChan
 
 	player = otoCtx.NewPlayer(decodedMP3)
-	//	player.SetVolume(1)
+	player.SetVolume(1)
 	player.Play()
-	go handleStop()
+	go handlePause()
 }
 
 func stopAudio() {
@@ -71,7 +72,8 @@ func stopAudio() {
 	}
 }
 
-func handleStop() {
+func handlePause() {
+playAgain:
 	for player.IsPlaying() {
 		select {
 		case msg := <-stopCh:
@@ -81,8 +83,11 @@ func handleStop() {
 			}
 
 		default:
-			time.Sleep(time.Millisecond)
+			time.Sleep(100 * time.Millisecond)
 		}
 	}
-
+	//Repeat song if not stopped
+	player.Seek(0, io.SeekStart)
+	player.Play()
+	goto playAgain
 }
