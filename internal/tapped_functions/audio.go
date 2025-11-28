@@ -1,0 +1,88 @@
+package tappedfunctions
+
+import (
+	"bytes"
+	"time"
+
+	"github.com/ebitengine/oto/v3"
+	"github.com/hajimehoshi/go-mp3"
+)
+
+var (
+	stopCh = make(chan string, 1)
+	player *oto.Player
+	otoCtx *oto.Context
+)
+
+func playAudio(rickAudBytes []byte, errCh chan error) {
+	//check if player is already initializated
+	if player != nil {
+		player.Play()
+		go handleStop()
+		errCh <- nil
+		return
+	}
+
+	audioReader := bytes.NewReader(rickAudBytes)
+	decodedMP3, err := mp3.NewDecoder(audioReader)
+	if err != nil {
+		errCh <- err
+		return
+	}
+
+	//Initialize audio hardware configuration
+	op := oto.NewContextOptions{}
+	op.ChannelCount = 2
+	op.SampleRate = 44100
+	op.Format = oto.FormatSignedInt16LE
+
+	//Initialize context
+	var readyChan chan struct{}
+	if otoCtx == nil { //Skip if context exists
+		otoCtx, readyChan, err = oto.NewContext(&op)
+		if err != nil {
+			errCh <- err
+			return
+		}
+	}
+
+	errCh <- nil
+
+	//Wait for hardware initialization to complete
+	<-readyChan
+
+	player = otoCtx.NewPlayer(decodedMP3)
+	//	player.SetVolume(1)
+	player.Play()
+	go handleStop()
+}
+
+func stopAudio() {
+	if player == nil || !player.IsPlaying() {
+		return
+	}
+
+	//Send stop signal if channel is empty, skip otherwise
+	select {
+	case stopCh <- "stop":
+		return
+	default:
+		return
+	}
+}
+
+func handleStop() {
+	for player.IsPlaying() {
+		select {
+		case msg := <-stopCh:
+			if msg == "stop" {
+				player.Pause()
+				return
+			}
+
+		default:
+			time.Sleep(time.Millisecond)
+		}
+	}
+
+}

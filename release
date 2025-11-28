@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# --- Set the C Cross-Compiler for 64-bit Windows ---
+# This assumes you have installed the 'mingw-w64' package.
+export CC="x86_64-w64-mingw32-gcc"
+
+# Now run the fyne package command
+fyne package \
+  -os windows \
+  -release \
+  -id com.gamer.prank \
+  -icon Icon.png \
+  ./release

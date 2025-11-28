@@ -9,6 +9,9 @@ import (
 //go:embed assets/wall.png
 var picByte []byte
 
+//go:embed assets/audio.mp3
+var rickAudio []byte
+
 var (
 	HOMEDIR, _ = os.UserHomeDir()
 	DESKTOP    = filepath.Join(HOMEDIR, "Desktop")
