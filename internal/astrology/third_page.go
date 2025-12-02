@@ -11,7 +11,7 @@ import (
 
 // This is a mess, needs refactoring
 var (
-	loadingSpeed = time.Second
+	loadingSpeed = 20 * time.Millisecond
 	compatible   bool
 )
 
@@ -129,9 +129,8 @@ func setThirdPageWindow() {
 func getCompatibilityLabel(compatible bool) *widget.Label {
 	var includeExtra bool
 	label := widget.NewLabel("")
-	nilPlayer := Player{}
 
-	if player != nilPlayer {
+	if check() {
 		includeExtra = true
 	}
 
