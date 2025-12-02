@@ -9,12 +9,15 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+// This is a mess, needs refactoring
 var (
-	loadingSpeed = 20 * time.Millisecond
+	loadingSpeed = time.Second
+	compatible   bool
 )
 
-func StartCC() func() {
+func StartCompatibilityChecker() func() {
 	return func() {
+		initNav()
 		thirdPage()
 	}
 }
@@ -50,7 +53,6 @@ func thirdPage() {
 
 func calcStatus(p1Dob *widget.DateEntry, p2Dob *widget.DateEntry) func() {
 	return func() {
-		var compatible bool
 		t1 := p1Dob.Date
 		t2 := p2Dob.Date
 
@@ -67,18 +69,13 @@ func calcStatus(p1Dob *widget.DateEntry, p2Dob *widget.DateEntry) func() {
 			compatible = true
 		}
 
-		showCompatibility(compatible)
+		showCompatibility()
 	}
 }
 
-func showCompatibility(compatible bool) {
+func showCompatibility() {
 	descL := widget.NewLabel("Checking compatibility...")
-
-	homeB := widget.NewButton("Home", func() { cfg.RestartCh <- "restart" })
-	exitB := widget.NewButton("Exit", func() { fyne.CurrentApp().Quit() })
-
-	navigationButtons := container.New(layout.NewGridLayout(2), exitB, homeB)
-	loading := getLoading(compatible, navigationButtons)
+	loading := getLoading()
 
 	cfg.Window.SetContent(container.NewVBox(
 		descL,
@@ -89,38 +86,47 @@ func showCompatibility(compatible bool) {
 	))
 }
 
-func getLoading(compatible bool, navigationButtons *fyne.Container) *widget.ProgressBar {
+func getLoading() *widget.ProgressBar {
 	loading := widget.NewProgressBar()
-	loading.Min = 0
-	loading.Max = 100
-	go loadAndShow(loading, compatible, navigationButtons)
+	go startLoading(loading)
 	return loading
 }
 
-func loadAndShow(loading *widget.ProgressBar, compatible bool, navigationButtons *fyne.Container) {
-	fyne.Do(func() {
-		time.Sleep(10 * time.Millisecond)
-		for i := 1.0; i <= 100; i += 1.0 {
-			loading.SetValue(i)
-			time.Sleep(loadingSpeed)
-		}
+func startLoading(loading *widget.ProgressBar) {
+	time.Sleep(10 * time.Millisecond)
+	for i := 0.0; i <= 1.0; i += 0.1 {
+		fyne.Do(func() { loading.SetValue(i) })
+		time.Sleep(loadingSpeed)
+	}
 
-		descL := widget.NewLabel("Compatibility results: ")
-		label := getResultLabel(compatible)
+	fyne.Do(setThirdPageWindow)
+}
 
+func setThirdPageWindow() {
+	descL := widget.NewLabel("Compatibility results: ")
+	label := getCompatibilityLabel(compatible)
+
+	if check() {
 		cfg.Window.SetContent(container.NewVBox(
 			descL,
 			label,
 			layout.NewSpacer(),
 			widget.NewSeparator(),
-			widget.NewButton("See interesting information", rickrollOrRestore()),
+			widget.NewButton("See guessed personality", resultPage()),
 			navigationButtons,
 		))
-	})
-
+	} else {
+		cfg.Window.SetContent(container.NewVBox(
+			descL,
+			label,
+			layout.NewSpacer(),
+			widget.NewSeparator(),
+			navigationButtons,
+		))
+	}
 }
 
-func getResultLabel(compatible bool) *widget.Label {
+func getCompatibilityLabel(compatible bool) *widget.Label {
 	var includeExtra bool
 	label := widget.NewLabel("")
 	nilPlayer := Player{}
@@ -132,21 +138,21 @@ func getResultLabel(compatible bool) *widget.Label {
 	if compatible {
 		label.SetText("You two are compatible, at least mathematically...")
 		if includeExtra {
-			if player.inRelationship || player.isMarried {
-				label.SetText(label.Text + "\nAre you happy?\nIf yes, wait till you see drama.\nAbsolute cinema.")
+			if player.status == inRelationship || player.status == isMarried {
+				label.SetText(label.Text + "\nYou finally got what everyone wants. \nDon’t worry, you’ll ruin it like everything else.")
 			}
-			if player.isSingle {
-				label.SetText(label.Text + "\nStill pretty sure you'll get dumped.\nAbsolute cinema.")
+			if player.status == isSingle {
+				label.SetText(label.Text + "\nEven when the universe sets you up to win, you still end up alone. \nThat’s not bad luck — that’s you.")
 			}
 		}
 	} else {
-		label.SetText("Your choices are same as your mind\nPathetic.")
+		label.SetText("Your choices are same as your mind.\nPathetic.")
 		if includeExtra {
-			if player.inRelationship || player.isMarried {
-				label.SetText(label.Text + "\nStarting to question your life choices?\nHilarious \nIt's just the start, not the end...")
+			if player.status == inRelationship || player.status == isMarried {
+				label.SetText(label.Text + "\nThis relationship is two bad decisions dating each other. \nIt won’t last — but the regret will.")
 			}
-			if player.isSingle {
-				label.SetText(label.Text + "\nDon't worry you'll die as a virgin too")
+			if player.status == isSingle {
+				label.SetText(label.Text + "\nNot only are you alone — you’re meant to be alone. \nDestiny itself said ‘nah.")
 			}
 		}
 	}

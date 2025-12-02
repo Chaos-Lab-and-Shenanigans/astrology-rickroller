@@ -46,7 +46,7 @@ func setWindowRR(w fyne.Window) {
 	descContainer := container.New(layout.NewCenterLayout(), descL)
 
 	//Hide instead of closing the app
-	w.SetCloseIntercept(closeIntercept(w))
+	w.SetCloseIntercept(func() { w.Hide() })
 
 	w.SetContent(container.NewVBox(
 		descContainer,
@@ -56,10 +56,4 @@ func setWindowRR(w fyne.Window) {
 			descL.SetText(descL.Text + "\n" + "Fuck off man")
 		}),
 	))
-}
-
-func closeIntercept(w fyne.Window) func() {
-	return func() {
-		w.Hide()
-	}
 }

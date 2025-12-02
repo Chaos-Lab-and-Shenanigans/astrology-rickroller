@@ -57,7 +57,7 @@ func setStartWindow() {
 		layout.NewSpacer(),
 		widget.NewSeparator(),
 		widget.NewButton("Start Astrology", astrology.StartAstro()),
-		widget.NewButton("Compatibility checker", astrology.StartCC()),
+		widget.NewButton("Compatibility checker", astrology.StartCompatibilityChecker()),
 		widget.NewButton("Exit", func() { myApp.Quit() }),
 		widget.NewSeparator(),
 	))

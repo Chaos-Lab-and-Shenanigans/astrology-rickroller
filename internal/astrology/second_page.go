@@ -7,7 +7,6 @@ import (
 )
 
 func secondPage() {
-	makeStatusFalse()
 	radioL := widget.NewLabel("Choose your status")
 	radioW := widget.NewRadioGroup(
 		[]string{"Single", "Relationship", "Married"},
@@ -44,33 +43,35 @@ func secondPage() {
 }
 
 func check() bool {
-	if player.isMarried || player.inRelationship || player.isSingle {
+	if player.zodiacSign == nil {
+		return false
+	}
+
+	switch player.status {
+	case isSingle:
+		return true
+	case inRelationship:
+		return true
+	case isMarried:
 		return true
 	}
+
 	return false
 }
 
 func radioFunc(s string) {
-	makeStatusFalse()
-
 	if s == "Single" {
-		player.isSingle = true
+		player.status = isSingle
 		return
 	}
 
 	if s == "Relationship" {
-		player.isMarried = true
+		player.status = isMarried
 		return
 	}
 
 	if s == "Married" {
-		player.isMarried = true
+		player.status = isMarried
 	}
 
-}
-
-func makeStatusFalse() {
-	player.isMarried = false
-	player.inRelationship = false
-	player.isSingle = false
 }
