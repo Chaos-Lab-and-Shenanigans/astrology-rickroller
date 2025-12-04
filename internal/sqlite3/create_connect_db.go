@@ -9,7 +9,7 @@ import (
 )
 
 func CreateAndConnect() (*sql.DB, error) {
-	pathDB := filepath.Join(config.Cfg.Path, config.Cfg.DBName)
+	pathDB := filepath.Join(config.PATH, config.DATABASE)
 	errCh1 := make(chan error)
 	errCh2 := make(chan error)
 
@@ -23,9 +23,7 @@ func CreateAndConnect() (*sql.DB, error) {
 		return nil, err
 	}
 
-	if config.Cfg.DB == nil {
-		config.Cfg.DB = db
-	}
+	config.Cfg.DB = db
 
 	ricky, backup, err := checkForInit()
 	if err != nil {

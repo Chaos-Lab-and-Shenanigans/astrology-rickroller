@@ -17,14 +17,9 @@ func restoreWallpaper(errCh chan error) {
 		return
 	}
 
-	if strings.Contains(strings.ToLower(config.BackupWall), "transcodedwallpaper") {
-		errCh <- fmt.Errorf("Change the wallpaper back yourself\n")
-		return
-	}
-
 	err := wallpaper.SetFromFile(config.BackupWall)
 	if err != nil {
-		errCh <- fmt.Errorf("Error restoring wallpaper: %v", err)
+		errCh <- err
 		return
 	}
 
@@ -32,9 +27,9 @@ func restoreWallpaper(errCh chan error) {
 }
 
 func setWallpaper(errCh chan error) {
-	rickyWallPath := filepath.Join(config.Cfg.Path, "wall.png")
+	rickyWallPath := filepath.Join(config.PATH, "wall.png")
 	err := backupWallpaper(rickyWallPath)
-	if errors.Is(err, config.RetErr) {
+	if errors.Is(err, config.WallAlreadyFkedErr) {
 		errCh <- nil
 		return
 	}
@@ -72,10 +67,17 @@ func backupWallpaper(rickyWallPath string) error {
 		return err
 	}
 
+	if strings.Contains(strings.ToLower(currentWallPath), "transcodedwallpaper") {
+		config.IsSlideshowWall = true
+		return nil
+	}
+
 	if currentWallPath == rickyWallPath {
-		return config.RetErr
+		return config.WallAlreadyFkedErr
 	}
 
 	config.BackupWall = currentWallPath
+	fmt.Printf("Wall: %v\n", config.BackupWall)
+
 	return nil
 }

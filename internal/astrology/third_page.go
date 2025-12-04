@@ -74,10 +74,11 @@ func showCompatibility() {
 
 	config.Cfg.Window.SetContent(container.NewVBox(
 		descL,
+		config.Extra,
 		layout.NewSpacer(),
 		loading,
 		widget.NewSeparator(),
-		config.HomeExitButtons,
+		config.GetHomeExitButtons(),
 	))
 }
 
@@ -105,19 +106,21 @@ func setThirdPageWindow() {
 		config.Cfg.Window.SetContent(container.NewVBox(
 			descL,
 			label,
+			config.Extra,
 			layout.NewSpacer(),
 			widget.NewSeparator(),
 			widget.NewButton("See guessed personality", resultPage()),
-			config.HomeExitButtons,
+			config.GetHomeExitButtons(),
 		))
 	} else {
 		config.Cfg.Window.SetContent(container.NewVBox(
 			descL,
 			label,
+			config.Extra,
 			layout.NewSpacer(),
 			widget.NewSeparator(),
 			widget.NewButton("See interesting information", func() { rickrollOrRestore() }),
-			config.HomeExitButtons,
+			config.GetHomeExitButtons(),
 		))
 	}
 }
@@ -131,7 +134,7 @@ func getCompatibilityLabel() *widget.Label {
 	}
 
 	if config.Compatible {
-		label.SetText("You two are config.Compatible, at least mathematically...")
+		label.SetText("You two are compatible, at least mathematically...")
 		if includeExtra {
 			if config.User.Status == config.InRelationship || config.User.Status == config.IsMarried {
 				label.SetText(label.Text + "\nYou finally got what everyone wants. \nDon’t worry, you’ll ruin it like everything else.")

@@ -8,8 +8,6 @@ import (
 	"github.com/Chaos-Lab-and-Shenanigans/order-breaker/internal/rickroll"
 )
 
-var db = config.Cfg.DB
-
 // Create and initlalize ricky table
 func initializeRicky(errCh chan error) {
 	db := config.Cfg.DB
@@ -26,7 +24,7 @@ func initializeRicky(errCh chan error) {
 		return
 	}
 
-	for _, words := range config.Lyrics {
+	for _, words := range config.LYRICS {
 		query := fmt.Sprintf("INSERT INTO ricky(body) VALUES (\"%v\")", words)
 		_, err = db.Exec(query)
 		if err != nil {
@@ -38,19 +36,19 @@ func initializeRicky(errCh chan error) {
 }
 
 func initializeBackup(errCh chan error) {
-	items, err := os.ReadDir(config.Cfg.Path)
+	items, err := os.ReadDir(config.PATH)
 	if err != nil {
 		errCh <- err
 	}
 
 	index := getNonMessedIndex(items)
 
-	if index == 1 {
-		fmt.Println("Recreating backup")
+	if index <= 1 {
+		config.Cfg.LogsCh <- "Recreating backup"
 		err = recreateBackup(items)
 		errCh <- err
 	} else {
-		fmt.Println("Adding to existing backup")
+		config.Cfg.LogsCh <- "Adding to existing backup"
 		err = addToExistingTable(items, index)
 		errCh <- err
 	}
@@ -61,17 +59,16 @@ func addToExistingTable(items []os.DirEntry, index int) error {
 	neededItems := items[index-1:] //neededItems contains only those items that need to be stored
 	for i, item := range neededItems {
 		name := item.Name()
-		fmt.Printf("Item %v: %v\n", i+1, name)
-		if name == config.Cfg.DBName || name == config.APP_NAME {
-			fmt.Println("skipped db file")
+		if name == config.DATABASE || name == config.APP_NAME {
 			continue
 		}
 
 		query := fmt.Sprintf("INSERT INTO backup(body) VALUES (\"%v\")", name)
-		_, err := db.Exec(query)
+		_, err := config.Cfg.DB.Exec(query)
 		if err != nil {
 			return err
 		}
+		config.Cfg.LogsCh <- fmt.Sprintf("Item %v: %v added to backup\n", i+1, name)
 	}
 	return nil
 }
@@ -81,7 +78,7 @@ func getNonMessedIndex(items []os.DirEntry) int { //returns the index of item no
 	for _, item := range items {
 		name := item.Name()
 
-		if name == "backupob.db" { //skip without incrementing if app's file
+		if name == config.APP_NAME || name == config.DATABASE { //skip without incrementing if app's file
 			continue
 		}
 
@@ -96,6 +93,7 @@ func getNonMessedIndex(items []os.DirEntry) int { //returns the index of item no
 
 // Create and initialize backup table
 func recreateBackup(items []os.DirEntry) error {
+	db := config.Cfg.DB
 	db.Exec("DROP TABLE backup")
 	_, err := db.Exec("CREATE TABLE backup(id INTEGER PRIMARY KEY, body TEXT NOT NULL)")
 	if err != nil {

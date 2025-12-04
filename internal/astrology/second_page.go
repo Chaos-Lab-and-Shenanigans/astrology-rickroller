@@ -37,6 +37,7 @@ func secondPage() {
 	config.Cfg.Window.SetContent(container.NewVBox(
 		radioL,
 		radioContainer,
+		config.Extra,
 		layout.NewSpacer(),
 		navigation,
 	),

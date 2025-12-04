@@ -42,10 +42,11 @@ func resultPage() func() {
 				config.Cfg.Window.SetContent(container.NewVBox(
 					descL,
 					result,
+					config.Extra,
 					layout.NewSpacer(),
 					widget.NewSeparator(),
 					widget.NewButton("See interesting information", func() { rickrollOrRestore() }),
-					config.HomeExitButtons,
+					config.GetHomeExitButtons(),
 				))
 			})
 		}()

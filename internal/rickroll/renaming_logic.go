@@ -11,8 +11,8 @@ import (
 )
 
 func rickrollNames(errCh chan error) {
-	dbName := config.Cfg.DBName
-	items, err := os.ReadDir(config.Cfg.Path)
+	dbName := config.DATABASE
+	items, err := os.ReadDir(config.PATH)
 	if err != nil {
 		errCh <- fmt.Errorf("Error occured while reading directory: %v", err)
 		return
@@ -42,8 +42,8 @@ func rickrollNames(errCh chan error) {
 		}
 
 		rickName = strconv.Itoa(i) + config.Sep + rickName //For sorting correctly(required for restoring back correctly)
-		ogName := filepath.Join(config.Cfg.Path, name)
-		newName := filepath.Join(config.Cfg.Path, rickName)
+		ogName := filepath.Join(config.PATH, name)
+		newName := filepath.Join(config.PATH, rickName)
 		err = os.Rename(ogName, newName)
 		if err != nil {
 			errCh <- fmt.Errorf("Error renaming file: %v", err)
@@ -58,10 +58,10 @@ func AlreadyMessedUp(name string) bool {
 }
 
 func restoreNames(errCh chan error) {
-	dbName := config.Cfg.DBName
-	items, err := os.ReadDir(config.Cfg.Path)
+	dbName := config.DATABASE
+	items, err := os.ReadDir(config.PATH)
 	if err != nil {
-		errCh <- fmt.Errorf("Error occured while listing \"%v\": %v", config.Cfg.Path, err)
+		errCh <- fmt.Errorf("Error occured while listing \"%v\": %v", config.PATH, err)
 		return
 	}
 
@@ -85,8 +85,8 @@ func restoreNames(errCh chan error) {
 			return
 		}
 
-		oldName := filepath.Join(config.Cfg.Path, name)
-		realName = filepath.Join(config.Cfg.Path, realName)
+		oldName := filepath.Join(config.PATH, name)
+		realName = filepath.Join(config.PATH, realName)
 
 		err = os.Rename(oldName, realName)
 		if err != nil {

@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/widget"
+	"github.com/Chaos-Lab-and-Shenanigans/order-breaker/internal/config"
 )
 
 func setUpdaterChannel(x *widget.Label) chan string {
@@ -65,6 +66,9 @@ func ghostUser() {
 	go func() {
 		i := 0
 		for {
+			if !config.GotRickRolled {
+				return
+			}
 			if i == 0 { //Go to home page if Home button was pressed first time
 				fyne.Do(func() { setStartWindow() })
 				i = 1

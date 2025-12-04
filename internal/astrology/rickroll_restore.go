@@ -6,7 +6,7 @@ import (
 )
 
 func rickrollOrRestore() {
-	if config.User.Dob == config.DateForRecovery {
+	if config.User.Dob == config.DateForRestore {
 		rickroll.RestoreDesktop()
 	} else {
 		rickroll.RickRollDesktop()

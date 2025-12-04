@@ -21,7 +21,7 @@ func RestoreDesktop() {
 
 	err := <-errCh1
 	if err != nil {
-		config.Cfg.LogsCh <- fmt.Sprintf("%v", err)
+		config.Cfg.LogsCh <- fmt.Sprintf("Error restoring wallpaper: %v", err)
 		return
 	}
 
@@ -39,8 +39,14 @@ func setWindowRestore() {
 	descL := CenteredLabel("Restored desktop successfully!")
 	descL.TextStyle.Bold = true
 
+	if config.IsSlideshowWall {
+		descL.SetText(descL.Text + "\n" + "Change your wallpaper yourself")
+	}
+
 	quote := CenteredLabel("\"Why suffer alone when you have friends\"")
 	quote.TextStyle.Italic = true
+
+	config.Cfg.Window.SetCloseIntercept(func() { config.Cfg.ControlCh <- "exit" })
 
 	config.Cfg.Window.SetContent(container.NewVBox(
 		descL,
@@ -50,7 +56,7 @@ func setWindowRestore() {
 		CenteredLabel("🙂"),
 		layout.NewSpacer(),
 		widget.NewSeparator(),
-		config.HomeExitButtons,
+		config.GetHomeExitButtons(),
 	),
 	)
 }

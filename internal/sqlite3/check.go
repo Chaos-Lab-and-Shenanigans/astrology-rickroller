@@ -11,10 +11,10 @@ import (
 func checkForInit() (bool, bool, error) {
 	var backup bool
 	var ricky bool
-	var lenR int
-	var lenB int
+	var lenR int //Total length including the first initializer
+	var lenB int //Same
 	db := config.Cfg.DB
-	path := config.Cfg.Path
+	path := config.PATH
 
 	//Backup table's check
 	row := db.QueryRow("SELECT COUNT(*) FROM backup")
@@ -29,7 +29,9 @@ func checkForInit() (bool, bool, error) {
 		return ricky, backup, err
 	}
 
-	config.Cfg.LogsCh <- fmt.Sprintf("\nLength in db: %v\nLength in folder: %v\n", lenB, len(items))
+	//lenB-1 bcz first element in db is the intializer
+	config.Cfg.LogsCh <- fmt.Sprintf("Items in db(exlcuding program files):     %v", lenB-1)
+	config.Cfg.LogsCh <- fmt.Sprintf("Items in folder(including program files): %v", len(items))
 
 	if lenB != len(items) {
 		backup = true
@@ -43,7 +45,7 @@ func checkForInit() (bool, bool, error) {
 		return ricky, backup, nil
 	}
 
-	if lenR != len(config.Lyrics) {
+	if lenR != len(config.LYRICS) {
 		ricky = true
 	}
 	return ricky, backup, nil
