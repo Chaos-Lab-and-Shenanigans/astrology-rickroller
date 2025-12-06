@@ -59,6 +59,8 @@ If you have the Go toolchain installed, you can build the application yourself:
     * *Note: Fyne requires standard system dependencies. Check the [Fyne Documentation](https://developer.fyne.io/started/) if you encounter build errors.*
 
 3.  **Build and Run:**
+
+    **(Use of `buildwin` and `release` scripts is deprecated)**
    
     Make sure you have `fyne-cross` installed by running:     
     ```bash
