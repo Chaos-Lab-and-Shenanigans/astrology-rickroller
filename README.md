@@ -1,8 +1,4 @@
 # 🌟 Astrology Rickroller - The Cosmic Deceiver
-## Motivation
-Quick Start
-Usage
-Contributing
 > **"You expect ancient wisdom, but you get something better: Eternal Rickroll."**
 
 ![Go](https://img.shields.io/badge/Language-Go-00ADD8?style=for-the-badge&logo=go)
